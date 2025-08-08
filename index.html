@@ -1,183 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href= "style.css">
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cytra VCF Manager</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      color: #00ffcc;
-      text-align: center;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-width: 400px;
-      margin: auto;
-    }
-    input, button {
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: none;
-    }
-    input {
-      background: #222;
-      color: #fff;
-    }
-    button {
-      background: #00ffcc;
-      cursor: pointer;
-    }
-    .contact {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: #1e1e1e;
-      padding: 10px;
-      margin: 10px auto;
-      max-width: 400px;
-      border-radius: 8px;
-    }
-    .avatar {
-      width: 40px;
-      height: 40px;
-      background: #00ffcc;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: #000;
-      font-size: 18px;
-    }
-    a {
-      color: #00ffcc;
-      text-decoration: none;
-    }
-    .center {
-      text-align: center;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cytra's VCF Saver</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="app.js" defer></script>
 </head>
 <body>
-  <h1>Cytra's Contact Vault 📱</h1>
-  <form id="contactForm">
-    <input type="text" id="name" placeholder="Enter full name" required />
-    <input type="tel" id="phone" placeholder="+2547XXXXXXX" required />
-    <button type="submit">Add Contact</button>
-  </form>
+  <div class="container">
+    <h1>📇 Cytra's VCF Web App</h1>
 
-  <div class="center">
-    <p><strong>Total Contacts:</strong> <span id="count">0</span></p>
-    <button id="downloadVCF">Download VCF</button>
+    <form id="contactForm">
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="tel" id="phone" placeholder="+254712345678" required />
+      <button type="submit">➕ Add Contact</button>
+    </form>
+
+    <div id="progress"></div>
+
+    <h2>📋 Saved Contacts</h2>
+    <ul id="contactList"></ul>
+
+    <button id="downloadVCF">⬇️ Download VCF</button>
   </div>
-
-  <div id="contactList"></div>
-
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCyQTC9BMD90v8EOS5ZJOOzLArqifp85Qk",
-      authDomain: "cytra-a9b1d.firebaseapp.com",
-      projectId: "cytra-a9b1d",
-      storageBucket: "cytra-a9b1d.appspot.com",
-      messagingSenderId: "60383087529",
-      appId: "1:60383087529:web:4c4c792eba06a10f4412b8",
-      measurementId: "G-LGJ250744Y"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const contactList = document.getElementById("contactList");
-    const contactForm = document.getElementById("contactForm");
-    const nameInput = document.getElementById("name");
-    const phoneInput = document.getElementById("phone");
-    const countSpan = document.getElementById("count");
-
-    phoneInput.addEventListener("input", () => {
-      if (!phoneInput.value.startsWith("+")) {
-        phoneInput.value = "+" + phoneInput.value.replace(/^\+?/, '');
-      }
-    });
-
-    function getInitials(name) {
-      return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-    }
-
-    async function isPhoneUnique(phone) {
-      const snapshot = await db.collection("contacts").where("phone", "==", phone).get();
-      return snapshot.empty;
-    }
-
-    contactForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = nameInput.value.trim();
-      let phone = phoneInput.value.trim().replace(/\s+/g, "");
-
-      if (!name || !phone.startsWith("+")) {
-        alert("Name and valid phone number required (e.g. +254...)");
-        return;
-      }
-
-      phone = phone.toLowerCase();
-
-      const isUnique = await isPhoneUnique(phone);
-      if (!isUnique) {
-        alert("This contact already exists!");
-        return;
-      }
-
-      await db.collection("contacts").add({ name, phone });
-      nameInput.value = "";
-      phoneInput.value = "";
-    });
-
-    db.collection("contacts").onSnapshot(snapshot => {
-      contactList.innerHTML = "";
-      let count = 0;
-      snapshot.forEach(doc => {
-        const { name, phone } = doc.data();
-        const avatar = getInitials(name);
-        const whatsappLink = `https://wa.me/${phone.replace(/\D/g, '')}`;
-        contactList.innerHTML += `
-          <div class="contact">
-            <div class="avatar">${avatar}</div>
-            <div>
-              <strong>${name}</strong><br>
-              <a href="${whatsappLink}" target="_blank">${phone}</a>
-            </div>
-          </div>
-        `;
-        count++;
-      });
-      countSpan.textContent = count;
-    });
-
-    document.getElementById("downloadVCF").addEventListener("click", async () => {
-      const snapshot = await db.collection("contacts").get();
-      let vcf = "";
-      snapshot.forEach(doc => {
-        const { name, phone } = doc.data();
-        vcf += `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL:${phone}\nEND:VCARD\n`;
-      });
-
-      const blob = new Blob([vcf], { type: "text/vcard" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "contacts.vcf";
-      link.click();
-    });
-  </script>
 </body>
 </html>

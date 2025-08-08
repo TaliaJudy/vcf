@@ -1,10 +1,14 @@
 // Firebase setup
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, getDocs, query, onSnapshot
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Cytra's Firebase config
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCyQTC9BMD90v8EOS5ZJOOzLArqifp85Qk",
   authDomain: "cytra-a9b1d.firebaseapp.com",
@@ -26,39 +30,49 @@ const contactList = document.getElementById("contactList");
 const progress = document.getElementById("progress");
 const downloadVCF = document.getElementById("downloadVCF");
 
+// Add contact to Firestore
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const name = nameInput.value.trim();
-  let phone = phoneInput.value.trim();
+  const phone = phoneInput.value.trim();
 
   if (!phone.startsWith("+")) {
-    alert("Phone number must start with a + and country code.");
+    alert("Phone number must start with + and country code.");
     return;
   }
 
-  const snapshot = await getDocs(contactsRef);
-  const exists = snapshot.docs.some(
-    doc => doc.data().phone === phone || doc.data().name.toLowerCase() === name.toLowerCase()
-  );
+  try {
+    const snapshot = await getDocs(contactsRef);
+    const exists = snapshot.docs.some(
+      doc =>
+        doc.data().phone === phone ||
+        doc.data().name.toLowerCase() === name.toLowerCase()
+    );
 
-  if (exists) {
-    alert("This contact already exists.");
-    return;
+    if (exists) {
+      alert("This contact already exists.");
+      return;
+    }
+
+    await addDoc(contactsRef, { name, phone });
+    console.log("✅ Contact added:", name, phone);
+
+    nameInput.value = "";
+    phoneInput.value = "";
+  } catch (err) {
+    console.error("❌ Error saving contact:", err);
+    alert("Error saving contact. Check console.");
   }
-
-  await addDoc(contactsRef, { name, phone });
-  nameInput.value = "";
-  phoneInput.value = "";
 });
 
-// Realtime update
+// Live sync & download
 onSnapshot(contactsRef, (snapshot) => {
   contactList.innerHTML = "";
   let vcfContent = "";
   let count = 0;
 
-  snapshot.forEach(doc => {
+  snapshot.forEach((doc) => {
     const { name, phone } = doc.data();
     count++;
 

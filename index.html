@@ -3,26 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cytra's VCF Saver</title>
+  <title>Cytra VCF Contacts</title>
   <link rel="stylesheet" href="style.css" />
-  <script type="module" src="app.js" defer></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <h1>📇 Cytra's VCF Web App</h1>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center py-8">
 
-    <form id="contactForm">
-      <input type="text" id="name" placeholder="Full Name" required />
-      <input type="tel" id="phone" placeholder="+254712345678" required />
-      <button type="submit">➕ Add Contact</button>
-    </form>
+  <h1 class="text-3xl font-bold mb-6">📇 Cytra VCF Contact Saver</h1>
 
-    <div id="progress"></div>
+  <form id="contactForm" class="bg-gray-800 p-6 rounded shadow-md w-full max-w-md">
+    <div class="mb-4">
+      <label for="name" class="block text-sm font-medium">Name</label>
+      <input type="text" id="name" required class="mt-1 block w-full p-2 bg-gray-700 text-white rounded" />
+    </div>
+    <div class="mb-4">
+      <label for="phone" class="block text-sm font-medium">Phone (start with +)</label>
+      <input type="tel" id="phone" required class="mt-1 block w-full p-2 bg-gray-700 text-white rounded" />
+    </div>
+    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 py-2 rounded mt-4">
+      Save Contact
+    </button>
+  </form>
 
-    <h2>📋 Saved Contacts</h2>
-    <ul id="contactList"></ul>
-
-    <button id="downloadVCF">⬇️ Download VCF</button>
+  <div class="my-6">
+    <button id="downloadBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+      📥 Download VCF
+    </button>
   </div>
+
+  <div class="text-sm mb-2" id="progressText">No contacts saved yet.</div>
+
+  <div id="contactsList" class="w-full max-w-2xl space-y-3 px-4">
+    <!-- Contacts will be shown here -->
+  </div>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VCF Contact Saver</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; text-align: center; padding: 20px; }
+    input { padding: 10px; margin: 10px; width: 200px; font-size: 16px; }
+    button { padding: 10px 20px; font-size: 16px; margin: 10px; cursor: pointer; }
+    #progress { margin-top: 15px; color: green; }
+  </style>
+</head>
+<body>
+
+  <h2>💾 Save Contact + Download VCF 📇</h2>
+
+  <input id="name" placeholder="Full Name" />
+  <br/>
+  <input id="phone" placeholder="Phone Number" />
+  <br/>
+  <button onclick="saveContact()">Save Contact</button>
+  <button onclick="downloadVCF()">Download All VCF</button>
+
+  <div id="progress"></div>
+
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCyQTC9BMD90v8EOS5ZJOOzLArqifp85Qk",
+      authDomain: "cytra-a9b1d.firebaseapp.com",
+      projectId: "cytra-a9b1d",
+      storageBucket: "cytra-a9b1d.firebasestorage.app",
+      messagingSenderId: "60383087529",
+      appId: "1:60383087529:web:4c4c792eba06a10f4412b8",
+      measurementId: "G-LGJ250744Y"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const progress = document.getElementById("progress");
+
+    // Save Contact to Firestore
+    async function saveContact() {
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+
+      if (!name || !phone) {
+        progress.textContent = "❌ Please fill both fields.";
+        return;
+      }
+
+      try {
+        await db.collection("contacts").add({ name, phone });
+        progress.textContent = `✅ Saved: ${name} - ${phone}`;
+        document.getElementById("name").value = "";
+        document.getElementById("phone").value = "";
+      } catch (err) {
+        console.error(err);
+        progress.textContent = "❌ Error saving contact.";
+      }
+    }
+
+    // Download VCF file with all contacts
+    async function downloadVCF() {
+      progress.textContent = "⏳ Fetching contacts...";
+      try {
+        const snapshot = await db.collection("contacts").get();
+        const total = snapshot.size;
+
+        if (total === 0) {
+          progress.textContent = "⚠️ No contacts found!";
+          return;
+        }
+
+        let vcfData = "";
+        let count = 0;
+
+        snapshot.forEach(doc => {
+          const { name, phone } = doc.data();
+          vcfData += `
+BEGIN:VCARD
+VERSION:3.0
+FN:${name}
+TEL;TYPE=CELL:${phone}
+END:VCARD
+`.trim() + "\n";
+          count++;
+          progress.textContent = `✔ Processed ${count} of ${total}...`;
+        });
+
+        // Create and download file
+        const blob = new Blob([vcfData], { type: "text/vcard" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "cytra_contacts.vcf";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        progress.textContent = "✅ VCF Download Complete!";
+      } catch (error) {
+        console.error(error);
+        progress.textContent = "❌ Error downloading VCF.";
+      }
+    }
+  </script>
+
+</body>
+</html>

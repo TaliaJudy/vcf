@@ -1,0 +1,125 @@
+body {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  background: radial-gradient(ellipse at center, #0f0f0f, #000);
+  color: #0ff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px;
+  min-height: 100vh;
+}
+
+.container {
+  width: 95%;
+  max-width: 500px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(15px);
+  border-radius: 15px;
+  border: 1px solid #0ff;
+  padding: 30px;
+  box-shadow: 0 0 30px #0ff4;
+}
+
+h1 {
+  text-align: center;
+  color: #0ff;
+  margin-bottom: 20px;
+  text-shadow: 0 0 5px #0ff;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+input {
+  padding: 12px;
+  font-size: 1em;
+  border: none;
+  border-radius: 8px;
+  background: #111;
+  color: #0ff;
+  box-shadow: 0 0 8px #0ff3 inset;
+}
+
+button {
+  padding: 12px;
+  background: #0ff;
+  color: #000;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  text-shadow: 0 0 5px #000;
+}
+
+button:hover {
+  background: #00f9ff;
+  box-shadow: 0 0 15px #0ff;
+}
+
+#contactList {
+  margin-top: 20px;
+}
+
+.contact-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #0ff3;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.contact-card img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.contact-card .info {
+  flex-grow: 1;
+}
+
+.contact-card a {
+  color: #0ff;
+  text-decoration: none;
+  font-size: 0.9em;
+}
+
+#status {
+  font-size: 0.9em;
+  text-align: center;
+  color: #f0f;
+}
+
+#downloadVCF {
+  display: inline-block;
+  margin-top: 20px;
+  text-align: center;
+  color: #0ff;
+  text-decoration: none;
+  font-weight: bold;
+  border: 1px solid #0ff6;
+  padding: 10px 15px;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+#downloadVCF:hover {
+  background: #0ff3;
+  color: #000;
+}
+
+.progress {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 0.9em;
+}

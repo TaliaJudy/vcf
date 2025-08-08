@@ -2,27 +2,214 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cytra's VCF Saver</title>
-  <link rel="stylesheet" href="style.css" />
-  <script type="module" src="app.js" defer></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cytra's VCF Hub 💾</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1c1c1c, #000);
+      color: #fff;
+    }
+    .container {
+      max-width: 720px;
+      margin: auto;
+      padding: 30px 20px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      color: gold;
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    }
+    form, .actions, .search {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+    }
+    input {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    input:focus {
+      outline: none;
+      border: 2px solid gold;
+      box-shadow: 0 0 10px gold;
+    }
+    button {
+      background: gold;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #ffd700cc;
+    }
+    .contact-card {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 16px;
+      margin-top: 15px;
+      border-radius: 10px;
+      border-left: 5px solid gold;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+    .contact-card h3 {
+      margin: 0 0 5px 0;
+      font-size: 1.2rem;
+      color: #fff;
+    }
+    .contact-card p {
+      margin: 0;
+      color: #ccc;
+    }
+    .contact-card a {
+      display: inline-block;
+      margin-top: 8px;
+      color: #25d366;
+      text-decoration: none;
+    }
+    #search {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-size: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: 0.3s;
+    }
+    #search:focus {
+      outline: none;
+      border-color: gold;
+      box-shadow: 0 0 10px gold;
+    }
+    .count {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-top: 8px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>📇 Cytra's VCF Web App</h1>
+    <h1>📇 Cytra's VCF Hub</h1>
 
     <form id="contactForm">
       <input type="text" id="name" placeholder="Full Name" required />
-      <input type="tel" id="phone" placeholder="+254712345678" required />
-      <button type="submit">➕ Add Contact</button>
+      <input type="text" id="phone" placeholder="Phone Number (e.g. 254712345678)" required />
+      <button type="submit">Save Contact</button>
     </form>
 
-    <div id="progress"></div>
+    <div class="actions">
+      <button onclick="downloadVCF()">⬇️ Download VCF</button>
+      <div id="contactCount" class="count"></div>
+    </div>
 
-    <h2>📋 Saved Contacts</h2>
-    <ul id="contactList"></ul>
+    <div class="search">
+      <input type="text" id="search" placeholder="🔍 Search name or number..." />
+    </div>
 
-    <button id="downloadVCF">⬇️ Download VCF</button>
+    <div id="contacts"></div>
   </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCyQTC9BMD90v8EOS5ZJOOzLArqifp85Qk",
+      authDomain: "cytra-a9b1d.firebaseapp.com",
+      projectId: "cytra-a9b1d",
+      storageBucket: "cytra-a9b1d.firebasestorage.app",
+      messagingSenderId: "60383087529",
+      appId: "1:60383087529:web:4c4c792eba06a10f4412b8",
+      measurementId: "G-LGJ250744Y"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const contactsRef = collection(db, "contacts");
+
+    const form = document.getElementById("contactForm");
+    const contactsDiv = document.getElementById("contacts");
+    const countSpan = document.getElementById("contactCount");
+    const searchInput = document.getElementById("search");
+
+    let allContacts = [];
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      if (!name || !phone || !/^2547\d{8}$/.test(phone)) {
+        alert("Enter a valid name and Kenyan phone number (e.g. 254712345678)");
+        return;
+      }
+      try {
+        await addDoc(contactsRef, { name, phone });
+        form.reset();
+      } catch (err) {
+        alert("Error saving contact: " + err.message);
+      }
+    });
+
+    onSnapshot(contactsRef, (snapshot) => {
+      allContacts = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      renderContacts(allContacts);
+      countSpan.innerText = `${allContacts.length} contact(s)`;
+    });
+
+    function renderContacts(contacts) {
+      contactsDiv.innerHTML = "";
+      contacts.forEach(({ name, phone }) => {
+        const div = document.createElement("div");
+        div.className = "contact-card";
+        div.innerHTML = `
+          <h3>${name}</h3>
+          <p>${phone}</p>
+          <a href="https://wa.me/${phone}" target="_blank">💬 WhatsApp</a>
+        `;
+        contactsDiv.appendChild(div);
+      });
+    }
+
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.toLowerCase();
+      const filtered = allContacts.filter(({ name, phone }) =>
+        name.toLowerCase().includes(query) || phone.includes(query)
+      );
+      renderContacts(filtered);
+    });
+
+    async function downloadVCF() {
+      const snapshot = await getDocs(contactsRef);
+      let vcfContent = "";
+      snapshot.forEach(doc => {
+        const { name, phone } = doc.data();
+        vcfContent += `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL;TYPE=CELL:${phone}\nEND:VCARD\n`;
+      });
+      const blob = new Blob([vcfContent], { type: "text/vcard" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "contacts.vcf";
+      a.click();
+    }
+  </script>
 </body>
 </html>

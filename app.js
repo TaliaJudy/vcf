@@ -1,81 +1,95 @@
-// Firebase setup
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getFirestore, collection, addDoc, getDocs, query, onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-// Cytra's Firebase config
+// Firebase config (replace with your actual config)
 const firebaseConfig = {
   apiKey: "AIzaSyCyQTC9BMD90v8EOS5ZJOOzLArqifp85Qk",
   authDomain: "cytra-a9b1d.firebaseapp.com",
   projectId: "cytra-a9b1d",
-  storageBucket: "cytra-a9b1d.firebasestorage.app",
+  storageBucket: "cytra-a9b1d.appspot.com",
   messagingSenderId: "60383087529",
   appId: "1:60383087529:web:4c4c792eba06a10f4412b8",
   measurementId: "G-LGJ250744Y"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const contactsRef = collection(db, "contacts");
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const contactsRef = db.collection("contacts");
 
-const form = document.getElementById("contactForm");
-const nameInput = document.getElementById("name");
-const phoneInput = document.getElementById("phone");
-const contactList = document.getElementById("contactList");
-const progress = document.getElementById("progress");
-const downloadVCF = document.getElementById("downloadVCF");
+// Random favicon
+const domains = [
+  "google.com", "youtube.com", "github.com", "twitter.com",
+  "netflix.com", "spotify.com", "amazon.com", "wikipedia.org"
+];
+function getRandomFavicon() {
+  const domain = domains[Math.floor(Math.random() * domains.length)];
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+}
 
-form.addEventListener("submit", async (e) => {
+// Add contact
+document.getElementById("contactForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const name = nameInput.value.trim();
-  let phone = phoneInput.value.trim();
+  const name = document.getElementById("name").value.trim();
+  let phone = document.getElementById("phone").value.trim();
 
-  if (!phone.startsWith("+")) {
-    alert("Phone number must start with a + and country code.");
-    return;
-  }
+  if (!name || !phone) return alert("Name and phone are required!");
+  if (!phone.startsWith("+")) phone = "+" + phone;
 
-  const snapshot = await getDocs(contactsRef);
-  const exists = snapshot.docs.some(
-    doc => doc.data().phone === phone || doc.data().name.toLowerCase() === name.toLowerCase()
-  );
+  const exists = await contactsRef.where("phone", "==", phone).get();
+  if (!exists.empty) return alert("This number already exists!");
 
-  if (exists) {
-    alert("This contact already exists.");
-    return;
-  }
-
-  await addDoc(contactsRef, { name, phone });
-  nameInput.value = "";
-  phoneInput.value = "";
+  await contactsRef.add({ name, phone });
+  document.getElementById("contactForm").reset();
+  fetchContacts();
 });
 
-// Realtime update
-onSnapshot(contactsRef, (snapshot) => {
-  contactList.innerHTML = "";
-  let vcfContent = "";
-  let count = 0;
+// Fetch & render contacts
+async function fetchContacts() {
+  const container = document.getElementById("contactsContainer");
+  container.innerHTML = "";
+  const snapshot = await contactsRef.get();
 
+  let contacts = [];
   snapshot.forEach(doc => {
-    const { name, phone } = doc.data();
-    count++;
-
-    const li = document.createElement("li");
-    li.textContent = `${name} — ${phone}`;
-    contactList.appendChild(li);
-
-    vcfContent += `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL:${phone}\nEND:VCARD\n`;
+    contacts.push(doc.data());
   });
 
-  progress.textContent = `📱 Total Contacts: ${count}`;
+  contacts.forEach(contact => {
+    const avatar = getRandomFavicon();
 
-  downloadVCF.onclick = () => {
-    const blob = new Blob([vcfContent], { type: "text/vcard" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "cytra_contacts.vcf";
-    link.click();
-  };
+    const card = document.createElement("div");
+    card.className = "flex items-center bg-white p-4 rounded shadow-md hover:bg-gray-100 transition";
+
+    card.innerHTML = `
+      <img src="${avatar}" class="w-10 h-10 rounded-full mr-4 border" alt="avatar" />
+      <div class="flex-1">
+        <h3 class="font-semibold">${contact.name}</h3>
+        <p class="text-gray-600">${contact.phone}</p>
+      </div>
+      <a href="https://wa.me/${contact.phone.replace(/\+/g, '')}" target="_blank"
+         class="text-blue-500 hover:underline">WhatsApp</a>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+// Download VCF
+document.getElementById("downloadBtn").addEventListener("click", async () => {
+  const snapshot = await contactsRef.get();
+  let vcf = "";
+
+  snapshot.forEach(doc => {
+    const contact = doc.data();
+    vcf += `BEGIN:VCARD\nVERSION:3.0\nFN:${contact.name}\nTEL:${contact.phone}\nEND:VCARD\n`;
+  });
+
+  const blob = new Blob([vcf], { type: "text/vcard" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "contacts.vcf";
+  a.click();
+  URL.revokeObjectURL(url);
 });
+
+// On load
+fetchContacts();

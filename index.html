@@ -1,215 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cytra's VCF Hub 💾</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1c1c1c, #000);
-      color: #fff;
-    }
-    .container {
-      max-width: 720px;
-      margin: auto;
-      padding: 30px 20px;
-    }
-    h1 {
-      text-align: center;
-      font-size: 2.5rem;
-      color: gold;
-      text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-    }
-    form, .actions, .search {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 20px;
-      margin-top: 20px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(10px);
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-    }
-    input {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-    }
-    input:focus {
-      outline: none;
-      border: 2px solid gold;
-      box-shadow: 0 0 10px gold;
-    }
-    button {
-      background: gold;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #ffd700cc;
-    }
-    .contact-card {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 16px;
-      margin-top: 15px;
-      border-radius: 10px;
-      border-left: 5px solid gold;
-      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-    }
-    .contact-card h3 {
-      margin: 0 0 5px 0;
-      font-size: 1.2rem;
-      color: #fff;
-    }
-    .contact-card p {
-      margin: 0;
-      color: #ccc;
-    }
-    .contact-card a {
-      display: inline-block;
-      margin-top: 8px;
-      color: #25d366;
-      text-decoration: none;
-    }
-    #search {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      color: #fff;
-      font-size: 1rem;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      transition: 0.3s;
-    }
-    #search:focus {
-      outline: none;
-      border-color: gold;
-      box-shadow: 0 0 10px gold;
-    }
-    .count {
-      font-size: 0.9rem;
-      color: #aaa;
-      margin-top: 8px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cytra's VCF Hub</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    font-size: 2em;
+    margin: 20px;
+    text-shadow: 0 0 15px cyan, 0 0 25px cyan;
+  }
+  .container {
+    max-width: 500px;
+    margin: auto;
+    padding: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 15px rgba(0,255,255,0.3);
+  }
+  input, button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+  }
+  input {
+    width: calc(100% - 20px);
+    background: rgba(255,255,255,0.2);
+    color: white;
+  }
+  button {
+    background: linear-gradient(45deg, cyan, blue);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px cyan;
+  }
+  .contact-card {
+    background: rgba(255,255,255,0.1);
+    margin: 10px;
+    padding: 10px;
+    border-radius: 15px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 10px rgba(0,255,255,0.2);
+  }
+  .battery-container {
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    overflow: hidden;
+    height: 25px;
+    margin: 15px 0;
+  }
+  .battery-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    transition: width 0.5s ease;
+    background-size: 200% 200%;
+    animation: waterFlow 3s linear infinite;
+  }
+  @keyframes waterFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: -200% 50%; }
+  }
+  .info {
+    font-size: 0.9em;
+    margin: 5px 0;
+    opacity: 0.8;
+  }
+  #contacts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .no-contacts {
+    font-style: italic;
+    opacity: 0.7;
+    margin-top: 10px;
+  }
+  footer {
+    margin-top: 20px;
+    font-size: 0.8em;
+    opacity: 0.7;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>📇 Cytra's VCF Hub</h1>
 
-    <form id="contactForm">
-      <input type="text" id="name" placeholder="Full Name" required />
-      <input type="text" id="phone" placeholder="Phone Number (e.g. 254712345678)" required />
-      <button type="submit">Save Contact</button>
-    </form>
+<h1>📇 Cytra's VCF Hub</h1>
 
-    <div class="actions">
-      <button onclick="downloadVCF()">⬇️ Download VCF</button>
-      <div id="contactCount" class="count"></div>
-    </div>
+<div class="container">
+  <form id="contactForm">
+    <input type="text" id="name" placeholder="Name" required>
+    <input type="text" id="phone" placeholder="Phone (2547XXXXXXXX)" required>
+    <button type="submit">Save Contact</button>
+  </form>
 
-    <div class="search">
-      <input type="text" id="search" placeholder="🔍 Search name or number..." />
-    </div>
+  <input type="text" id="search" placeholder="Search contacts...">
+  <p id="contactCount">0 contact(s)</p>
+  <button onclick="downloadVCF()">📥 Download VCF</button>
 
-    <div id="contacts"></div>
+  <div class="battery-container">
+    <div id="batteryBar" class="battery-bar"></div>
   </div>
+  <p id="batteryInfo" class="info">Battery: --%</p>
+  <p id="ipInfo" class="info">IP Address: --</p>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
+  <div id="contacts"></div>
+  <p id="noContactsMsg" class="no-contacts" style="display:none;">No contacts found</p>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCyQTC9BMD90v8EOS5ZJOOzLArqifp85Qk",
-      authDomain: "cytra-a9b1d.firebaseapp.com",
-      projectId: "cytra-a9b1d",
-      storageBucket: "cytra-a9b1d.firebasestorage.app",
-      messagingSenderId: "60383087529",
-      appId: "1:60383087529:web:4c4c792eba06a10f4412b8",
-      measurementId: "G-LGJ250744Y"
-    };
+<footer>
+  Made with ❤️ by Cytra
+</footer>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const contactsRef = collection(db, "contacts");
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js";
 
-    const form = document.getElementById("contactForm");
-    const contactsDiv = document.getElementById("contacts");
-    const countSpan = document.getElementById("contactCount");
-    const searchInput = document.getElementById("search");
+const firebaseConfig = {
+  apiKey: "AIzaSyCyQTC9BMD90v8EOS5ZJOOzLArqifp85Qk",
+  authDomain: "cytra-a9b1d.firebaseapp.com",
+  projectId: "cytra-a9b1d",
+  storageBucket: "cytra-a9b1d.firebasestorage.app",
+  messagingSenderId: "60383087529",
+  appId: "1:60383087529:web:4c4c792eba06a10f4412b8",
+  measurementId: "G-LGJ250744Y"
+};
 
-    let allContacts = [];
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const contactsRef = collection(db, "contacts");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      if (!name || !phone || !/^2547\d{8}$/.test(phone)) {
-        alert("Enter a valid name and Kenyan phone number (e.g. 254712345678)");
-        return;
-      }
-      try {
-        await addDoc(contactsRef, { name, phone });
-        form.reset();
-      } catch (err) {
-        alert("Error saving contact: " + err.message);
-      }
-    });
+const form = document.getElementById("contactForm");
+const contactsDiv = document.getElementById("contacts");
+const countSpan = document.getElementById("contactCount");
+const searchInput = document.getElementById("search");
+const noContactsMsg = document.getElementById("noContactsMsg");
 
-    onSnapshot(contactsRef, (snapshot) => {
-      allContacts = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      renderContacts(allContacts);
-      countSpan.innerText = `${allContacts.length} contact(s)`;
-    });
+let allContacts = [];
+let searchActive = false;
 
-    function renderContacts(contacts) {
-      contactsDiv.innerHTML = "";
-      contacts.forEach(({ name, phone }) => {
-        const div = document.createElement("div");
-        div.className = "contact-card";
-        div.innerHTML = `
-          <h3>${name}</h3>
-          <p>${phone}</p>
-          <a href="https://wa.me/${phone}" target="_blank">💬 WhatsApp</a>
-        `;
-        contactsDiv.appendChild(div);
-      });
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  if (!name || !phone || !/^2547\d{8}$/.test(phone)) {
+    alert("Enter a valid name and Kenyan phone number (e.g. 254712345678)");
+    return;
+  }
+  try {
+    await addDoc(contactsRef, { name, phone });
+    form.reset();
+  } catch (err) {
+    alert("Error saving contact: " + err.message);
+  }
+});
+
+onSnapshot(contactsRef, (snapshot) => {
+  allContacts = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  countSpan.innerText = `${allContacts.length} contact(s)`;
+  if (!searchActive) renderContacts(allContacts);
+});
+
+searchInput.addEventListener("input", () => {
+  const query = searchInput.value.toLowerCase();
+  searchActive = query.length > 0;
+  const filtered = allContacts.filter(({ name, phone }) =>
+    name.toLowerCase().includes(query) || phone.includes(query)
+  );
+  renderContacts(filtered);
+});
+
+function renderContacts(contacts) {
+  contactsDiv.innerHTML = "";
+  if (contacts.length === 0) {
+    noContactsMsg.style.display = "block";
+    return;
+  }
+  noContactsMsg.style.display = "none";
+  contacts.forEach(({ name, phone }) => {
+    const div = document.createElement("div");
+    div.className = "contact-card";
+    div.innerHTML = `
+      <h3>${name}</h3>
+      <p>${phone}</p>
+      <a href="https://wa.me/${phone}" target="_blank">💬 WhatsApp</a>
+    `;
+    contactsDiv.appendChild(div);
+  });
+}
+
+window.downloadVCF = async function () {
+  const snapshot = await getDocs(contactsRef);
+  let vcfContent = "";
+  snapshot.forEach(doc => {
+    const { name, phone } = doc.data();
+    vcfContent += `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL;TYPE=CELL:${phone}\nEND:VCARD\n`;
+  });
+  const blob = new Blob([vcfContent], { type: "text/vcard" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "contacts.vcf";
+  a.click();
+}
+
+if (navigator.getBattery) {
+  navigator.getBattery().then(battery => {
+    function updateBattery() {
+      const batteryBar = document.getElementById("batteryBar");
+      const level = battery.level * 100;
+      batteryBar.style.width = level + "%";
+      if (level < 20) batteryBar.style.background = "linear-gradient(90deg, red, darkred)";
+      else if (level < 50) batteryBar.style.background = "linear-gradient(90deg, gold, orange)";
+      else batteryBar.style.background = "linear-gradient(90deg, #00c6ff, #0072ff)";
+      document.getElementById("batteryInfo").innerText =
+        `Battery: ${level.toFixed(0)}% ${battery.charging ? "(Charging ⚡)" : "(Not Charging)"}`;
     }
+    updateBattery();
+    battery.addEventListener("levelchange", updateBattery);
+    battery.addEventListener("chargingchange", updateBattery);
+  });
+} else {
+  document.getElementById("batteryInfo").innerText = "Battery API not supported.";
+}
 
-    searchInput.addEventListener("input", () => {
-      const query = searchInput.value.toLowerCase();
-      const filtered = allContacts.filter(({ name, phone }) =>
-        name.toLowerCase().includes(query) || phone.includes(query)
-      );
-      renderContacts(filtered);
-    });
-
-    async function downloadVCF() {
-      const snapshot = await getDocs(contactsRef);
-      let vcfContent = "";
-      snapshot.forEach(doc => {
-        const { name, phone } = doc.data();
-        vcfContent += `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL;TYPE=CELL:${phone}\nEND:VCARD\n`;
-      });
-      const blob = new Blob([vcfContent], { type: "text/vcard" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "contacts.vcf";
-      a.click();
-    }
-  </script>
+fetch("https://api.ipify.org?format=json")
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById("ipInfo").innerText = "IP Address: " + data.ip;
+  });
+</script>
 </body>
 </html>
